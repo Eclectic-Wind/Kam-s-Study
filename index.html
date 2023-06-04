@@ -1,9 +1,140 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Hello</title>
-  </head>
-  <body>
-    <h1>Hello</h1>
-  </body>
+<head>
+   
+    <title>v0.1</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@3/marked.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .CodeMirror-cursor {
+            border-left: 1px solid white !important;
+        }
+        .CodeMirror {
+            background-color: #333 !important;
+            color: white;
+            border: 1px solid #9f9f9f;
+        }
+
+        .editor-toolbar {
+            background-color: #333;
+            color: white;
+            border: 1px solid #9f9f9f;
+        }
+
+        .editor-toolbar a {
+            color: white !important;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>styled text generator.</h1>
+    <div class="styling">
+            <input type="text" id="title" placeholder="Title here..."><br>
+        <label for="input">Content (Markdown):</label><br>
+        <textarea id="input" rows="10" cols="50"></textarea><br>
+        <div class="buttons">
+            <button onclick="generate()">Generate</button><br>
+            <button onclick="copyToClipboard()">Copy</button>
+        </div>
+        <pre id="output"></pre><br>
+    </div>
+    <script>
+        var simplemde = new SimpleMDE({ 
+            element: document.getElementById("input"),
+            placeholder: "Enter your text here..."
+        });
+        
+
+        function generate() {
+            var title = document.getElementById("title").value;
+            var input = simplemde.value();
+            var output = document.getElementById("output");
+
+            if (!title || !input) {
+                alert("Please enter a title and content.");
+                return;
+            }
+
+            var html = `<!DOCTYPE html>
+<html>
+    <!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>${title}</title>
+<link rel="stylesheet" href="styles-essay.css">
+</head>
+<body>
+<body>
+    <div id="trigger"></div>
+    <div id="table-of-content">
+        <ul>
+            ${generateTableOfContents(input)}
+        </ul>
+    </div>    
+    <div id="content">
+        ${marked(input)}
+    </div>
+</body>
+</html>`;
+
+            output.textContent = html;
+        }
+
+        function copyToClipboard() {
+            var output = document.getElementById("output");
+            navigator.clipboard.writeText(output.textContent);
+        }
+
+        function generateTableOfContents(input) {
+            var headers = input.match(/^(#+)(.*)$/gm);
+            var tableOfContents = "";
+            var previousLevel = 1;
+
+            if (!headers) {
+                return "";
+            }
+
+            for (var i = 0; i < headers.length; i++) {
+                var header = headers[i];
+                var level = header.match(/^#+/)[0].length;
+                var text = header.replace(/^#+\s*/, "");
+                var anchor = generateAnchor(text);
+
+                var className = "";
+                if (level === 1) {
+                if (i === 0) {
+                    className = "section-base first-section";
+                } else {
+                    className = "section-base";
+                }
+                } else if (level === 2) {
+                className = "section-first-layer";
+                } else if (level === 3) {
+                className = "section-second-layer";
+                } else {
+                className = "section-third-layer";
+                }
+
+                tableOfContents += `<li class="${className}"><a href="#${anchor}">${text}</a></li>`;
+
+                previousLevel = level;
+            }
+
+            return tableOfContents;
+          }
+
+
+
+          function generateAnchor(text) {
+            return text.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "");
+            }
+
+
+    </script>
+</body>
 </html>
